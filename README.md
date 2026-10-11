@@ -15,8 +15,14 @@ The repository goes from **product brief → evaluation PRD → eval catalogue �
 | [`ProductBrief.md`](./ProductBrief.md) | One-page brief for the Meeting Summarizer: problem, users, requirements, out-of-scope, risks, open questions. |
 | [`PRD.md`](./PRD.md) | Full product requirements document for the **AI Evals** system: definitions of "good", failure taxonomy, golden dataset, the four-grader ladder (code checks → LLM judge → agent judge → human review), and release gating. |
 | [`Evals list.md`](./Evals%20list.md) | Working catalogue of **25 evals (E01–E25)** — Faithfulness, Completeness, Action items, Format & usability, Safety/tone/fairness, and Robustness — each tied to a failure mode. |
-| [`Test cases - Validation Set.csv`](./Test%20cases%20-%20Validation%20Set.csv) | **100 validation test cases** covering all 25 evals (4 per eval), with transcripts, expected answers, must-include / must-not-include strings, difficulty, and the failure mode being tested. |
-| [`Test cases.xlsx`](./Test%20cases.xlsx) | The same validation test set in Excel format. |
+| [`Test cases - Golden set.csv`](./Test%20cases%20-%20Golden%20set.csv) | **200-row golden (labelled) test set**: 25 evals × 8 case types, with transcripts, contexts, gold answers, must-include / must-not-include strings, and a `test_set` split column (Train / Validation / Test). |
+| [`Test cases - Golden Train set.csv`](./Test%20cases%20-%20Golden%20Train%20set.csv) | The **Train split (40 rows, 20%)** — kept for few-shot examples in the agent prompt. |
+| [`Test cases - Golden Validation set.csv`](./Test%20cases%20-%20Golden%20Validation%20set.csv) | The **Validation split (120 rows, 60%)** — imported into n8n as the `Validation eval set` data table. |
+| [`Test cases - Golden Test set.csv`](./Test%20cases%20-%20Golden%20Test%20set.csv) | The **Test split (40 rows, 20%)** — the blind set, kept sealed until release time. |
+| [`Few shot examples.md`](./Few%20shot%20examples.md) | **8 paste-ready few-shot examples** (input transcript + expected output) picked from the Train split for the agent prompt. |
+| [`n8n-eval-workflow.md`](./n8n-eval-workflow.md) | **Step-by-step n8n guide** for Steps 7–9: import the validation table, wire the LLM judge, and run the evaluation. |
+| [`Test cases - Validation Set.csv`](./Test%20cases%20-%20Validation%20Set.csv) | Earlier **100 validation test cases** covering all 25 evals (4 per eval). |
+| [`Test cases.xlsx`](./Test%20cases.xlsx) | The same 100-case validation test set in Excel format. |
 | [`README.md`](./README.md) | This overview. |
 | [`LICENSE`](./LICENSE) | MIT license. |
 
@@ -29,8 +35,12 @@ PRD.md                   →  the eval system spec, built from failure modes
         ↓
 Evals list.md            →  E01–E25: each failure → a named, testable eval
         ↓
-Test cases - Validation Set.csv/.xlsx
-                        →  100 ground-truth test cases that run the evals
+Test cases - Golden set.csv
+                         →  200 labelled cases (25 evals × 8 case types)
+        ↓  split 20 / 60 / 20 (stratified per eval)
+Train (40)  →  Few shot examples.md  →  agent prompt (Step 6)
+Validation (120) →  n8n "Validation eval set" table → LLM judge → metrics (Steps 7–9)
+Test (40)   →  blinded until release gate
 ```
 
 ## Core principle
@@ -39,11 +49,12 @@ Test cases - Validation Set.csv/.xlsx
 
 The product defines "good" from **user outcomes and business risk** (a summary is Faithful, Complete, and Usable), ranks failures by severity (High / Medium / Low), and weights them so an invented commitment counts far more than a clumsy sentence.
 
-## Validation set at a glance
+## Golden set at a glance
 
-- **100 test cases** across **25 evals**, 4 per eval
-- Each case includes structured fields: `user_input` (transcript), `context`, `expected_answer`, `must_include`, `must_not_include`, `difficulty`, and `failure_mode_being_tested`
-- Covers edge cases, adversarial inputs (e.g., prompt injection), and hard real-world scenarios such as relative dates, vague asks, and customer-facing claims
+- **200 test cases** across **25 evals**, 8 per eval — one row per case type: happy path, negative, edge/boundary, ambiguous/incomplete, adversarial, noisy input, multi-turn/context, and tool/agent failure
+- Each case includes structured fields: `user_input` (transcript), `context`, `expected_behavior`, `expected_answer`, `must_include`, `must_not_include`, `expected_tool_or_agent`, `difficulty`, and `failure_mode_being_tested`
+- Pre-split **Train 40 (20%) / Validation 120 (60%) / Test 40 (20%)**, stratified per eval so all three sets look alike (every eval appears in every split)
+- The earlier `Test cases - Validation Set.csv` / `.xlsx` (100 cases, 4 per eval) remains as a compact companion set
 
 ## Project status
 
