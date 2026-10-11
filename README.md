@@ -23,6 +23,7 @@ The repository goes from **product brief → evaluation PRD → eval catalogue �
 | [`n8n-eval-workflow.md`](./n8n-eval-workflow.md) | **Step-by-step n8n guide** for Steps 7–9: import the validation table, wire the LLM judge, and run the evaluation. |
 | [`Release gate checklist.md`](./Release%20gate%20checklist.md) | **Scored, fill-in-the-blanks release gate** — run the PRD § 11 thresholds on the blind set, record evidence, and get a GREEN / RED / INCONCLUSIVE verdict before shipping. |
 | [`Eval run report.md`](./Eval%20run%20report.md) | **PMF submission run report** — paste the n8n results into this template: aggregate + per-eval + per-case-type results, failure analysis, judge calibration, and sign-off. |
+| [`Eval run report - Example filled.md`](./Eval%20run%20report%20-%20Example%20filled.md) | **Illustrative filled example** of the run report — internally consistent (fabricated) numbers showing a completed run: validation 120 → fixes → blind gate GREEN. Replace with real results before submitting. |
 | [`Test cases - Validation Set.csv`](./Test%20cases%20-%20Validation%20Set.csv) | Earlier **100 validation test cases** covering all 25 evals (4 per eval). |
 | [`Test cases.xlsx`](./Test%20cases.xlsx) | The same 100-case validation test set in Excel format. |
 | [`README.md`](./README.md) | This overview. |
