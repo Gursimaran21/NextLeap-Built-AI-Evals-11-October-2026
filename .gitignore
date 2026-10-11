@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node (if tooling is added later)
+node_modules/
+dist/
+build/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Python (if tooling is added later)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
