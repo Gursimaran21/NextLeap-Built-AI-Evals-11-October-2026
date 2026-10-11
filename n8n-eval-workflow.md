@@ -185,8 +185,6 @@ Done in the repo: [`Few shot examples.md`](./Few%20shot%20examples.md) — **8 p
 
 In n8n: append these to the agent's system prompt (Step 2), one block per example, right before the `Meeting transcript: <input>` line. They teach the exact output format, so the judge can focus on meaning instead of format drift.
 
-> Is `Few shot examples.md` needed in the GitHub repo? **Yes — keep it.** It is the Step 6 deliverable: it proves the Train split → few-shot pipeline, it gives you paste-ready text so you don't hand-write examples during the live n8n session, and the rest of the repo (README, cover page, golden set) already links to it. See the answer at the end of this file.
-
 ---
 
 ## Step 7 — Data table on n8n
@@ -283,17 +281,6 @@ Create a separate **agent** that receives the **traces** of your summarizer (raw
 ## Running the blind test set (release gate, later)
 
 Keep [`Test cases - Golden Test set.csv`](./Test%20cases%20-%20Golden%20Test%20set.csv) (40 rows) **unused** until the feature is stable. Run it once as a **blind release gate**: high-pass thresholds (≥ 95% faithful, ≥ 90% complete, ≥ 95% fair, zero High-severity failures, weighted points ≤ previous release) before shipping — PRD § 11.3, scored via the [`Release gate checklist.md`](./Release%20gate%20checklist.md). Never tune the prompt/rubric on blind rows (PRD § 11.5).
-
----
-
-## Do you need `Few shot examples.md` in the repo? — Yes
-
-1. **Step 6 asks for it** — the exercise says to add few-shot examples to the agent instruction from the train-set cases, giving input **and** expected output. The file is exactly that deliverable.
-2. **It's the paste-ready source for n8n** — during the live build you copy examples from it into the agent's system prompt instead of writing them by hand; it keeps the demo of the whole pipeline consistent.
-3. **It's part of the repo's data lineage** — README, cover page, and the golden-set docs link it to the Train split (40 rows → 8 examples); removing it would break the file map and the Step 5 → 6 story.
-4. **It costs nothing and proves the loop** — a reviewer can see the few-shots that shaped the agent's output format (relative dates, `- None`, injection refusal) and can reproduce the Step 6 action.
-
-(It is *optional* to *use* in n8n per the exercise, but as a repo artifact it should stay.)
 
 ---
 
