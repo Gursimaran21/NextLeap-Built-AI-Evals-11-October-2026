@@ -8,6 +8,8 @@
 
 **Scoring.** Mark every applicable gate item ✅ PASS or ❌ FAIL. The release is **GREEN only if every applicable item is PASS**. Any ❌ ⇒ **RED — do not ship.** If a gate item lands **within 1 failed row of its bar**, it is **inconclusive** — re-run once (no cherry-picking) or add blind rows before shipping.
 
+> Once the gate has a verdict, copy the numbers and failure analysis into the [**Eval run report**](./Eval%20run%20report.md) — the completed-run record for the PMF submission.
+
 ---
 
 ## Run template (fill in the blanks)
