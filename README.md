@@ -10,8 +10,11 @@ The repository goes from **product brief → evaluation PRD → eval catalogue �
 
 ## What's in this repository
 
+**Start here:** [`Submission cover page.md`](./Submission%20cover%20page.md) — a one-pager for NextLeap reviewers: the exercise, the artifacts, the demo run, and how to verify.
+
 | File | What it is |
 |------|------------|
+| [`Submission cover page.md`](./Submission%20cover%20page.md) | **One-page orientation for NextLeap reviewers** — how this repo answers the exercise, the pipeline, the (illustrative) headline result, and how to reproduce it. |
 | [`ProductBrief.md`](./ProductBrief.md) | One-page brief for the Meeting Summarizer: problem, users, requirements, out-of-scope, risks, open questions. |
 | [`PRD.md`](./PRD.md) | Full product requirements document for the **AI Evals** system: definitions of "good", failure taxonomy, golden dataset, the four-grader ladder (code checks → LLM judge → agent judge → human review), and release gating. |
 | [`Evals list.md`](./Evals%20list.md) | Working catalogue of **25 evals (E01–E25)** — Faithfulness, Completeness, Action items, Format & usability, Safety/tone/fairness, and Robustness — each tied to a failure mode. |
