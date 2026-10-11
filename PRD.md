@@ -3,7 +3,7 @@
 **Product:** AI Evaluation System ("AI Evals")
 **Reference application:** Meeting Summarizer (an LLM feature)
 **Status:** Draft for review
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2026-10-11
 **Owner:** TBD (Product + ML)
 **Source material:** [Evals Class — Meeting summarizer case study](https://evals-for-everyone.vercel.app/meeting-summarizer/foundations)
@@ -78,6 +78,8 @@ The core insight: quality must be **defined from user outcomes and business risk
 | Judge-human agreement on held-out data | Tracked and not regressing |
 
 > A prompt change that lowers raw pass counts while **raising** severity-weighted failure points is a regression, even if the summary "looks" fine.
+
+> **Release gate:** how the blind test set is scored, the pass rates that block a release (Faithful / Complete / Fair), and the decision rules are defined in [§ 11](#11-metrics--thresholds--the-release-gate).
 
 ---
 
@@ -253,7 +255,60 @@ The system MUST provide four grader types. Each is added because it sees somethi
 
 ---
 
-## 11. Open questions
+## 11. Metrics & thresholds — the release gate
+
+A release gates on **one honest snapshot**: run the whole suite over the **blind (Test) split** of the golden set and compare the result to the bars below. The blind set is **sealed** — never used to tune prompts, rubrics, or thresholds (FR-2.6, NFR-5) — and the snapshot is taken on the **exact candidate** being shipped (FR-7.5). Per-eval pass bars live in [Appendix A](#appendix-a--reference-eval-catalogue); this section defines the aggregate gate the release owner actually sees. In the pilot implementation, the blind set is the **40-row Test split** of `Test cases - Golden set.csv` (Train 40 / Validation 120 / Test 40, split 20/60/20 — see [README](README.md)), and the verdicts come from the n8n judge workflow in [n8n-eval-workflow.md](n8n-eval-workflow.md) — `faithful`, `complete`, and `fair` per row, plus code checks for facts, format, and limits.
+
+### 11.1 How each number is computed
+
+- **Per row:** the LLM judge emits `{faithful, complete, fair}` (default or custom JSON prompt); code checks add parse, word count, banned phrases, grounded numbers/names, and owner-in-attendees checks. A row passes a dimension when the judge (and any applicable code check) agrees.
+- **Pass rate:** `rows passing / blind-set rows` per dimension.
+- **Weighted failure points:** `Σ severity × failures` (High=3, Medium=2, Low=1) across all graded rows.
+- **Judge calibration:** a human-labelled sample from the Validation split, re-marked each release, measuring **false pass** (dangerous) and **false fail** separately (NFR-4).
+
+### 11.2 Release-gate thresholds (v1, starting points)
+
+| Dimension | Gate (blind set, 40 rows) | Grader | Fail action |
+|-----------|---------------------------|--------|-------------|
+| **Faithful** | ≥ 95% pass (≤ 2 rows fail) **and** zero High-severity faithfulness failures (invented number/offer, unsupported claim, wrong commitment — E01/E03/E04/E05) | Code check + LLM judge | Block |
+| **Complete** | ≥ 90% pass (≤ 4 rows fail) **and** no missing High decision/action; action-item recall ≥ 95% (E06–E10) | LLM judge + code recall | Block |
+| **Fair** | ≥ 95% pass **and** judge false-pass vs human labels < 5% (E19) | LLM judge + human sample | Block |
+| **Format & limits** | 100% parse; ≥ 99% of summaries ≤ 80 words; zero banned/filler phrases (E16/E17/E26) | Code check | Block |
+| **Robustness** | Long/messy/non-English (E23–E25) within 5 points of the clean baseline | Agent / LLM / human | Block if worse |
+| **Weighted failure points** | ≤ previous release — never regress (G6, § 5) | All graders | Block |
+| **Judge calibration** | False-pass < 5% on the fresh human sample (E31) | Human | Recalibrate; re-run gate |
+
+### 11.3 Release decision
+
+```
+RED if any of:
+  - any High-severity failure on the blind set (zero tolerance),
+  - a dimension below its gate in 11.2,
+  - weighted failure points regress vs the previous release,
+  - the blind set was not re-run on this exact candidate,
+  - judge false-pass ≥ 5% on the calibration sample.
+GREEN only when none of the above fire.
+```
+
+Everything else — drift monitors (E08 missed commitments, E29–E32 usage/audit metrics) — alerts but does **not** block; the gate stays short and trusted (FR-5.3).
+
+### 11.4 Small-set statistics (read this before arguing about 1 row)
+
+40 rows means **one failure = 2.5 points**. A threshold of 95% sits one failed row above 90%, so a single row can swing the verdict. Rules that keep the gate honest:
+
+- **Margin rule:** if a dimension lands within **1 fail of its bar**, treat the run as inconclusive — re-run once (blind set only, no cherry-picking) or add blind rows before shipping.
+- **Consecutive-green:** for the first releases, require **2 consecutive green blind runs** before the bar counts as met.
+- **Bars are starting points** (FR-5.4), set from human agreement and baseline, tightened as the golden set grows; recompute the thresholds when the blind set grows past a round size (e.g., 80, 120 rows).
+
+### 11.5 Blind-set hygiene
+
+- The Test split (`Test cases - Golden Test set.csv`, 40 rows) is held out of all tuning; nobody edits prompts, rubrics, or thresholds using rows from it.
+- Every gate run is recorded with the exact versions of the prompt, rubrics, golden answers, and judge model (NFR-6); every confirmed failure becomes a golden case and, where possible, a regression eval (FR-2.7).
+- A green automated suite is never the final word on fairness/tone: § 11.2 keeps a human sample in the gate for the Fair dimension (FR-6.5).
+
+---
+
+## 12. Open questions
 
 1. What is the target size and composition of the production golden set, and who owns curation?
 2. Which pass bars are release-blocking vs. advisory in v1? (Reference: 13 of 32 block release.)
