@@ -21,6 +21,7 @@ The repository goes from **product brief → evaluation PRD → eval catalogue �
 | [`Test cases - Golden Test set.csv`](./Test%20cases%20-%20Golden%20Test%20set.csv) | The **Test split (40 rows, 20%)** — the blind set, kept sealed until release time. |
 | [`Few shot examples.md`](./Few%20shot%20examples.md) | **8 paste-ready few-shot examples** (input transcript + expected output) picked from the Train split for the agent prompt. |
 | [`n8n-eval-workflow.md`](./n8n-eval-workflow.md) | **Step-by-step n8n guide** for Steps 7–9: import the validation table, wire the LLM judge, and run the evaluation. |
+| [`Release gate checklist.md`](./Release%20gate%20checklist.md) | **Scored, fill-in-the-blanks release gate** — run the PRD § 11 thresholds on the blind set, record evidence, and get a GREEN / RED / INCONCLUSIVE verdict before shipping. |
 | [`Test cases - Validation Set.csv`](./Test%20cases%20-%20Validation%20Set.csv) | Earlier **100 validation test cases** covering all 25 evals (4 per eval). |
 | [`Test cases.xlsx`](./Test%20cases.xlsx) | The same 100-case validation test set in Excel format. |
 | [`README.md`](./README.md) | This overview. |
