@@ -4,6 +4,8 @@ Full walkthrough of the **AI Evals Build Hours** exercise for the **Meeting Summ
 
 **Repo:** `NextLeap-Built-AI-Evals-11-October-2026` · **How to use:** do the steps marked ⏳ in n8n; the ✅ steps are already done in this repo and you just read/link them.
 
+It covers **Steps 1–11** — the nine core build steps plus the two optional advanced judges (**Step 10** own LLM as a judge, **Step 11** agent as a judge).
+
 ## Status at a glance
 
 | Step | What it is | Where | Status |
@@ -17,6 +19,8 @@ Full walkthrough of the **AI Evals Build Hours** exercise for the **Meeting Summ
 | 7 — Data Table | `Validation eval set` table in n8n | [`Test cases - Golden Validation set.csv`](./Test%20cases%20-%20Golden%20Validation%20set.csv) | ⏳ do in n8n |
 | 8 — LLM as a Judge | Evaluation workflow in n8n | default judge prompt | ⏳ do in n8n |
 | 9 — Run the eval | Evaluations tab → Run Evaluation | metrics → PRD § 11 gate | ⏳ do in n8n |
+| 10 — Own LLM as a Judge *(advanced)* | Custom Faithful/Complete/Fair **JSON judge** via any LLM node + Set Output | n8n (prompt in Step 10) | ⏳ optional, in n8n |
+| 11 — Agent as a Judge *(advanced)* | Separate **agent** vets the summarizer's traces & outcome | n8n | ⏳ optional, in n8n |
 
 ---
 
@@ -222,7 +226,7 @@ Build the evaluation workflow:
 
 > Tip: also pass `expected_answer`, `must_include`, and `must_not_include` from the row so the judge (or a code check) can do exact-substring checks on top of the LLM verdict.
 >
-> **Default vs. custom judge:** Step 8 uses n8n's **default** prompt. The **Advanced** section below has a drop-in **custom JSON judge** (Faithful/Complete/Fair with reasoning) you can use instead via an LLM node + Set Output — the repo's example runs assume this custom judge (rubric v2).
+> **Default vs. custom judge:** Step 8 uses n8n's **default** prompt. **Step 10** below has a drop-in **custom JSON judge** (Faithful/Complete/Fair with reasoning) you can use instead via an LLM node + Set Output — the repo's example runs assume this custom judge (rubric v2).
 
 ---
 
@@ -235,7 +239,7 @@ Build the evaluation workflow:
 
 ---
 
-## Advanced — Own LLM as a judge
+## Step 10 — Advanced: Own LLM as a judge
 
 Use any **LLM node** and **Set Output** to the dataset, with this prompt (drop-in replacement for the default judge):
 
@@ -262,11 +266,17 @@ Return output only JSON in below format:
 }
 ```
 
+**How to wire it:** feed the row's `user_input` (the TRANSCRIPT) and the agent's produced summary (the SUMMARY) into the LLM node → parse the JSON response → **Set Output** writes `reasoning`, `faithful`, `complete`, `fair` back to the dataset row → **Set metrics** aggregates them. The repo's example runs assume this **custom JSON judge** (rubric v2).
+
 ---
 
-## Advanced — Agent as a judge
+## Step 11 — Advanced: Agent as a judge
 
 Create a separate **agent** that receives the **traces** of your summarizer (raw transcript, retrieved lines, the summary, and any tool calls) and independently vets the process and the outcome. Useful for failure modes the Boolean judge can't see — e.g. the summarizer silently skipped a commitment (E06–E10) or followed an injected instruction (E22).
+
+**How to wire it:**
+- From the evaluation, hand this agent the transcript, the summarizer's intermediate traces/tool calls, and the final summary; ask it for a verdict (`sound` / `unsound`) plus the reason.
+- Use it on the rows the Boolean judge flags, on `tool_or_agent_failure` case types, or as a second-opinion pass over the blind Test set before the release gate.
 
 ---
 
